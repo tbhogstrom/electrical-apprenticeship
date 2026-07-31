@@ -1,2 +1,4 @@
 photos-review/
 scripts/.photo-export-state.json
+__pycache__/
+.DS_Store
