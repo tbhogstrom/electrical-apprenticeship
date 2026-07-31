@@ -3,10 +3,18 @@
 
 Usage:
     python3 scripts/export_photos_for_review.py [--since YYYY-MM-DD] [--until YYYY-MM-DD]
+    python3 scripts/export_photos_for_review.py --label construction --label toolbox
 
 Exports photos into photos-review/<run-timestamp>/ along with an index.html
 contact sheet. Review the contact sheet, delete anything irrelevant from
 that folder, then run web/scripts/upload-gallery-photos.ts against it.
+
+--label filters to photos matching any of Apple's on-device Photos labels
+(OR'd together when repeated). These are approximate, not a guarantee of
+relevance -- e.g. "construction" and "toolbox" will likely include some
+non-electrical DIY/tool photos too. When --label is given without --since
+or --until, the whole library is searched instead of defaulting to a
+recent date window.
 """
 
 import argparse
@@ -49,6 +57,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--until", type=str, default=None, help="YYYY-MM-DD, defaults to today"
     )
+    parser.add_argument(
+        "--label",
+        action="append",
+        default=None,
+        help="Filter to photos matching this on-device Photos label (repeatable, OR'd together)",
+    )
     return parser.parse_args()
 
 
@@ -87,9 +101,19 @@ figcaption {{ font-size: 12px; word-break: break-all; }}
 
 def main() -> None:
     args = parse_args()
-    since, until = resolve_date_range(args)
+    labels = set(args.label) if args.label else None
+    whole_archive = bool(labels) and not args.since and not args.until
 
-    print(f"Querying Photos library for photos from {since.date()} to {until.date()}...")
+    if whole_archive:
+        since, until = None, None
+        print(f"Searching the whole library for labels: {', '.join(sorted(labels))}...")
+    else:
+        since, until = resolve_date_range(args)
+        range_desc = f"from {since.date()} to {until.date()}"
+        if labels:
+            print(f"Querying Photos library {range_desc} for labels: {', '.join(sorted(labels))}...")
+        else:
+            print(f"Querying Photos library for photos {range_desc}...")
 
     try:
         db = osxphotos.PhotosDB()
@@ -103,13 +127,25 @@ def main() -> None:
         print(f"Underlying error: {e}", file=sys.stderr)
         sys.exit(1)
 
-    photos = [
-        p for p in db.photos(from_date=since, to_date=until) if not p.ismissing
-    ]
+    photos = list(db.photos(from_date=since, to_date=until))
+
+    if labels:
+        photos = [
+            p for p in photos if p.labels_normalized and labels & set(p.labels_normalized)
+        ]
+
+    missing_count = sum(1 for p in photos if p.ismissing)
+    if missing_count:
+        print(
+            f"{missing_count} of {len(photos)} matching photo(s) are iCloud-only "
+            "(not downloaded locally) -- will ask Photos to fetch originals during export, "
+            "which is slower than exporting local files."
+        )
 
     if not photos:
-        print("No photos found in that date range.")
-        save_last_export_date(until)
+        print("No photos found matching that query.")
+        if until:
+            save_last_export_date(until)
         return
 
     run_timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
@@ -118,14 +154,15 @@ def main() -> None:
 
     entries = []
     for photo in photos:
-        exported = photo.export(str(export_dir))
+        exported = photo.export(str(export_dir), use_photos_export=True)
         for filename in exported:
             entries.append(
                 {"filename": Path(filename).name, "date": photo.date.date().isoformat()}
             )
 
     build_contact_sheet(export_dir, entries)
-    save_last_export_date(until)
+    if until:
+        save_last_export_date(until)
 
     print(f"Exported {len(entries)} photo(s) to {export_dir}")
     print(f"Open {export_dir / 'index.html'} in a browser to review, delete anything irrelevant, then run:")
