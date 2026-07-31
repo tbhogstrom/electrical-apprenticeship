@@ -8,6 +8,7 @@ const DEFAULT_MATH_PROGRESS_FILE = join(
   "content/math-progress.json"
 );
 const DEFAULT_NOTEBOOKS_DIR = join(process.cwd(), "content/notebooks");
+const DEFAULT_GALLERY_FILE = join(process.cwd(), "content/gallery.json");
 
 export type ProjectMeta = {
   slug: string;
@@ -104,4 +105,19 @@ export function getNotebooks(
 
     return { slug, title };
   });
+}
+
+export type GalleryPhoto = {
+  url: string;
+  pathname: string;
+  caption: string;
+  uploadedAt: string;
+};
+
+export function getGalleryPhotos(
+  filePath: string = DEFAULT_GALLERY_FILE
+): GalleryPhoto[] {
+  if (!existsSync(filePath)) return [];
+  const raw = readFileSync(filePath, "utf-8");
+  return JSON.parse(raw) as GalleryPhoto[];
 }

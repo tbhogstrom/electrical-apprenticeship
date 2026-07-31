@@ -7,6 +7,7 @@ import {
   getProjectBySlug,
   getMathProgress,
   getNotebooks,
+  getGalleryPhotos,
 } from "./content";
 
 describe("getProjects", () => {
@@ -128,5 +129,35 @@ describe("getNotebooks", () => {
     const emptyDir = mkdtempSync(join(tmpdir(), "empty-notebooks-"));
     expect(getNotebooks(emptyDir)).toEqual([]);
     rmSync(emptyDir, { recursive: true, force: true });
+  });
+});
+
+describe("getGalleryPhotos", () => {
+  let filePath: string;
+
+  beforeAll(() => {
+    const dir = mkdtempSync(join(tmpdir(), "gallery-"));
+    filePath = join(dir, "gallery.json");
+    writeFileSync(
+      filePath,
+      JSON.stringify([
+        {
+          url: "https://example.public.blob.vercel-storage.com/gallery/panel-abc123.jpg",
+          pathname: "gallery/panel-abc123.jpg",
+          caption: "New panel installed",
+          uploadedAt: "2026-09-01T12:00:00.000Z",
+        },
+      ])
+    );
+  });
+
+  it("returns the parsed gallery photo list", () => {
+    const photos = getGalleryPhotos(filePath);
+    expect(photos).toHaveLength(1);
+    expect(photos[0].caption).toBe("New panel installed");
+  });
+
+  it("returns an empty array when the file doesn't exist", () => {
+    expect(getGalleryPhotos("/nonexistent/gallery.json")).toEqual([]);
   });
 });
