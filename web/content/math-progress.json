@@ -1,0 +1,10 @@
+[
+  { "id": "00-diagnostic", "title": "Diagnostic", "percentComplete": 0, "status": "not-started" },
+  { "id": "01-arithmetic-fractions-decimals-percents", "title": "Arithmetic: Fractions, Decimals, Percents", "percentComplete": 0, "status": "not-started" },
+  { "id": "02-ratios-proportions-measurement", "title": "Ratios, Proportions, Measurement", "percentComplete": 0, "status": "not-started" },
+  { "id": "03-pre-algebra", "title": "Pre-Algebra", "percentComplete": 0, "status": "not-started" },
+  { "id": "04-algebra-1", "title": "Algebra 1", "percentComplete": 0, "status": "not-started" },
+  { "id": "05-geometry-trig", "title": "Geometry & Right-Triangle Trig", "percentComplete": 0, "status": "not-started" },
+  { "id": "06-algebra-2", "title": "Algebra 2", "percentComplete": 0, "status": "not-started" },
+  { "id": "07-trade-math-bridge", "title": "Trade Math Bridge", "percentComplete": 0, "status": "not-started" }
+]

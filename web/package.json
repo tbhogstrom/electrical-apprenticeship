@@ -10,6 +10,9 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@jupyter-kit/katex-cdn": "^3.0.0",
+    "@jupyter-kit/react": "^3.0.0",
+    "@jupyter-kit/theme-default": "^3.0.0",
     "gray-matter": "^4.0.3",
     "next": "16.2.12",
     "next-mdx-remote": "^6.0.0",
