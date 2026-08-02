@@ -14,3 +14,9 @@ circuit log, and code/permit reference notes.
 - Built: 1923
 - Jurisdiction (city/county building dept): _fill in_
 - Panel age/type: _fill in after assessment_
+- Layout (per the original wiring diagram, unverified): 3 bedrooms
+  (BR#1, BR#2, BR#3), living room, kitchen, bath, washer/dryer closet,
+  hall, garage — see `assessment/circuit-inventory.md` for the
+  circuit-by-circuit draft transcription and
+  `assessment/diagrams/wiring-diagram-digitized.drawio` for the
+  digitized floor plan trace
